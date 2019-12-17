@@ -32,6 +32,7 @@ void Source_file::initialize()
 
     msg = new cMessage("IP Packet");
     send(msg, "outSource");
+    EV << "Source: Generated first message!";
 }
 
 void Source_file::handleMessage(cMessage *msg)
@@ -41,12 +42,14 @@ void Source_file::handleMessage(cMessage *msg)
     // We send out the message to the FIFO module
 
     send(msg, "outSourceFifo");
+    EV << "Source: Sending message from Source to FIFO";
 
     // We generate a new message and we send in
     // the new message for the next Source_file.handleMessage() function
 
     msg = new cMessage("IP Packet");
     send(msg, "outSource");
+    EV << "Source: Generated a new message!";
 }
 
 

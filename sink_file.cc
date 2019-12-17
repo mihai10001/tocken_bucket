@@ -42,6 +42,11 @@ void Sink_file::handleMessage(cMessage *msg)
     if (index < 100) {
         sink_message_array[index] = *msg;
         index++;
+        EV << "Sink: Received message from FIFO, adding to sink_array";
+    }
+    else {
+       EV << "Sink: Sink_array is full ! Discarding message: " << msg->getName();
+       delete msg;
     }
 }
 

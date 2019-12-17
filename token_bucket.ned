@@ -60,7 +60,10 @@ network TokenBucket
             @display("p=577,210;is=vl");
         }
     connections:
-        source.outSource --> {  delay = 100ms; } --> source.inSource;
+        // delay = the rate at which new messages are created
+        source.outSource --> {  delay = 10ms; } --> source.inSource;
+        // delay = B-the burstiness at which messages are delivered
         source.outSourceFifo --> {  delay = 100ms; } --> fifo.inFifo;
-        fifo.outFifo --> {  delay = 100ms; } --> sink.inSink;
+        // delay = R=continually sustainable data rate 
+        fifo.outFifo --> {  delay = 50ms; } --> sink.inSink;
 }

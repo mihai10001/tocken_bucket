@@ -40,10 +40,14 @@ void Fifo_file::handleMessage(cMessage *msg)
     // If there is space left in the FIFO queue, we insert the message
     // If there is no space left, we discard the message
 
-    if (buffer_message_array->getLength() < max_size)
+    if (buffer_message_array->getLength() < max_size) {
         buffer_message_array->insert(msg);
-    else
-        EV << "Queue is full ! Discarding message: " << msg->getName();
+        EV << "FIFO: Received message from Source, adding to queue";
+    }
+    else {
+        EV << "FIFO: Queue is full ! Discarding message: " << msg->getName();
+        delete msg;
+    }
 
     // If the FIFO queue is not empty, we pop the first element with queue->pop()
     // and we send it out to the Sink module
@@ -51,5 +55,6 @@ void Fifo_file::handleMessage(cMessage *msg)
     if (!buffer_message_array->isEmpty()) {
         cMessage *popped =  (cMessage *)buffer_message_array->pop();
         send(popped, "outFifo");
+        EV << "FIFO: Sending message from FIFO to Sink";
     }
 }
