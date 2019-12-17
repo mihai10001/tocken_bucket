@@ -6,8 +6,6 @@
  */
 
 #include <omnetpp.h>
-// #include <iostream>
-// #include <queue>
 
 using namespace omnetpp;
 
@@ -21,8 +19,8 @@ class Fifo_file : public cSimpleModule
     virtual void initialize() override;
     virtual void handleMessage(cMessage *msg) override;
   private:
-    // int max_size = 100;
-    // std::queue<cMessage> buffer_message_array;
+    cQueue *buffer_message_array;
+    int max_size;
 };
 
 // The module class needs to be registered with OMNeT++
@@ -30,17 +28,28 @@ Define_Module(Fifo_file);
 
 void Fifo_file::initialize()
 {
+    // No second parameter in constructor => queue has FIFO behavior
+
+    buffer_message_array = new cQueue("queue");
+    max_size = 100;
 }
 
 void Fifo_file::handleMessage(cMessage *msg)
 {
-    // The handleMessage() method is called whenever a message arrives
-    // at the module. Here, we have a message arriving from the Source file
+    // Here, we have a message arriving from the Source file
+    // If there is space left in the FIFO queue, we insert the message
+    // If there is no space left, we discard the message
 
-    // if (buffer_message_array.size() < max_size)
-    //     buffer_message_array.push(*msg);
-    // else
-    //     std::cout << "Queue is full ! Discarding message: " << *msg;
+    if (buffer_message_array->getLength() < max_size)
+        buffer_message_array->insert(msg);
+    else
+        EV << "Queue is full ! Discarding message: " << msg->getName();
 
-    send(msg, "outFifo"); // send out the message from queue.pop() to the Sink module
+    // If the FIFO queue is not empty, we pop the first element with queue->pop()
+    // and we send it out to the Sink module
+
+    if (!buffer_message_array->isEmpty()) {
+        cMessage *popped =  (cMessage *)buffer_message_array->pop();
+        send(popped, "outFifo");
+    }
 }

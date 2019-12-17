@@ -19,8 +19,9 @@ class Sink_file : public cSimpleModule
     virtual void initialize() override;
     virtual void handleMessage(cMessage *msg) override;
   private:
-    int index = 0;
-    cMessage sink_message_array[100];
+    cMessage *sink_message_array;
+    int max_array_size;
+    int index;
 };
 
 // The module class needs to be registered with OMNeT++
@@ -28,12 +29,15 @@ Define_Module(Sink_file);
 
 void Sink_file::initialize()
 {
+    max_array_size = 200;
+    sink_message_array = new cMessage[max_array_size];
+    index = 0;
 }
 
 void Sink_file::handleMessage(cMessage *msg)
 {
-    // The handleMessage() method is called whenever a message arrives
-    // at the module. Here, we have a message arriving from the Fifo file
+    // Here, we have a message arriving from the FIFO file
+    // If there is space left in the sink_array, we insert the message
 
     if (index < 100) {
         sink_message_array[index] = *msg;
