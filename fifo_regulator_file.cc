@@ -56,7 +56,7 @@ void FIFORegulator_file::handleMessage(cMessage *msg)
     } else if (strcmp(msg->getName(), "Token Found") == 0) {
         if (!buffer_message_array->isEmpty()) {
             cMessage *popped =  (cMessage *)buffer_message_array->pop();
-            send(popped, "outFifo");
+            send(popped, "outFifoReg");
             EV << "FIFO/Regulator: Token found! Sending message from FIFO/Regulator to Sink";
         } else if (buffer_message_array->isEmpty()) {
             EV << "FIFO/Regulator: Token found, but there is no message in queue!";
@@ -65,6 +65,7 @@ void FIFORegulator_file::handleMessage(cMessage *msg)
         if (!buffer_message_array->isEmpty()) {
             EV << "FIFO/Regulator: Queue is full! Discarding message: " << msg->getName();
             cMessage *popped =  (cMessage *)buffer_message_array->pop();
+            delete popped;
         }
     }
 

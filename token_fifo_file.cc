@@ -21,6 +21,7 @@ class Token_fifo_file : public cSimpleModule
   private:
     cQueue *buffer_message_array;
     int max_size;
+    cMessage *token_result;
 };
 
 // The module class needs to be registered with OMNeT++
@@ -55,10 +56,12 @@ void Token_fifo_file::handleMessage(cMessage *msg)
 
     if (!buffer_message_array->isEmpty()) {
         cMessage *popped =  (cMessage *)buffer_message_array->pop();
-        send("Token Found", "outTokenFifo");
+        token_result = new cMessage("Token Found");
+        send(token_result, "outFifoToken");
         EV << "Token FIFO: Sending Token Found message from Token FIFO to Regulator";
     } else if (buffer_message_array->isEmpty()) {
-        send("Token Not Found", "outTokenFifo");
+        token_result = new cMessage("Token Not Found");
+        send(token_result, "outFifoToken");
         EV << "Token FIFO: Sending Token Not Found message from Token FIFO to Regulator";
     }
 }

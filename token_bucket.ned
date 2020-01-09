@@ -23,6 +23,16 @@ simple Source_file
         output outSourceFifo;
 }
 
+simple FIFORegulator_file
+{
+    parameters:
+        @display("i=block/routing");
+    gates:
+        input inFifoRegPackets;
+        input inFifoRegTokens;
+        output outFifoReg;
+}
+
 simple Token_source_file
 {
     parameters:
@@ -33,13 +43,13 @@ simple Token_source_file
         output outSourceTokenFifo;
 }
 
-simple Fifo_file
+simple Token_fifo_file
 {
     parameters:
         @display("i=block/queue;q=queue");
     gates:
-        input inFifo;
-        output outFifo;
+        input inFifoToken;
+        output outFifoToken;
 }
 
 simple Sink_file
@@ -52,21 +62,35 @@ simple Sink_file
 
 network TokenBucket
 {
+    @display("bgb=887,457");
     submodules:
         source: Source_file {
-            @display("p=75,210;is=vl");
+            @display("p=118,383;is=vl");
         }
-        fifo: Fifo_file {
-            @display("p=332,210;is=vl");
+        fifoReg: FIFORegulator_file {
+            @display("p=447,383;is=vl");
+        }
+        tokenSource: Token_source_file {
+            @display("p=447,78;is=vl");
+        }
+        tokenFifo: Token_fifo_file {
+            @display("p=447,235;is=vl");
         }
         sink: Sink_file {
-            @display("p=577,210;is=vl");
+            @display("is=vl;p=762,383");
         }
     connections:
-        // delay = the rate at which new messages are created
-        source.outSource --> {  delay = 10ms; } --> source.inSource;
-        // delay = B-the burstiness at which messages are delivered
-        source.outSourceFifo --> {  delay = 100ms; } --> fifo.inFifo;
-        // delay = R=continually sustainable data rate 
-        fifo.outFifo --> {  delay = 50ms; } --> sink.inSink;
+        // delay = the rate at which new IP Packets are created
+        source.outSource --> {  delay = 20ms; } --> source.inSource;
+        // delay = the rate at which new Tokens are created
+        tokenSource.outSource --> {  delay = 100ms; } --> tokenSource.inSource;
+
+        // delay = B-the burstiness at which IP Packets are delivered to the regulator
+        source.outSourceFifo --> {  delay = 50ms; } --> fifoReg.inFifoRegPackets;
+        // delay = B-the burstiness at which Tokens are delivered to the regulator ( both delays added )
+        tokenSource.outSourceTokenFifo --> {  delay = 50ms; } --> tokenFifo.inFifoToken;
+        tokenFifo.outFifoToken --> {  delay = 50ms; } --> fifoReg.inFifoRegTokens;
+
+        // delay = R-continually sustainable data rate ( without accounting Tokens to regulator delay )
+        fifoReg.outFifoReg --> {  delay = 50ms; } --> sink.inSink;
 }
