@@ -18,10 +18,13 @@ class FIFORegulator_file : public cSimpleModule
   protected:
     virtual void initialize() override;
     virtual void handleMessage(cMessage *msg) override;
+    virtual void finish() override;
   private:
     cQueue *buffer_message_array;
     int max_size;
     cMessage *msg;
+    int statistic_regulator_ip_counter;
+    int statistic_regulator_token_counter;
 };
 
 // The module class needs to be registered with OMNeT++
@@ -33,6 +36,8 @@ void FIFORegulator_file::initialize()
 
     buffer_message_array = new cQueue("queue");
     max_size = 100;
+    statistic_regulator_ip_counter = 0;
+    statistic_regulator_token_counter = 0;
 }
 
 void FIFORegulator_file::handleMessage(cMessage *msg)
@@ -46,6 +51,8 @@ void FIFORegulator_file::handleMessage(cMessage *msg)
     // If there are no tokens left, we discard the message
 
     if (strcmp(msg->getName(), "IP Packet") == 0) {
+        statistic_regulator_ip_counter++;
+
         if (buffer_message_array->getLength() < max_size) {
             buffer_message_array->insert(msg);
             EV << "FIFO/Regulator: Received message from Source, adding to queue";
@@ -54,6 +61,8 @@ void FIFORegulator_file::handleMessage(cMessage *msg)
             delete msg;
         }
     } else if (strcmp(msg->getName(), "Token Found") == 0) {
+        statistic_regulator_token_counter++;
+
         if (!buffer_message_array->isEmpty()) {
             cMessage *popped =  (cMessage *)buffer_message_array->pop();
             send(popped, "outFifoReg");
@@ -63,18 +72,18 @@ void FIFORegulator_file::handleMessage(cMessage *msg)
         }
     } else if (strcmp(msg->getName(), "Token Not Found") == 0) {
         if (!buffer_message_array->isEmpty()) {
-            EV << "FIFO/Regulator: Queue is full! Discarding message: " << msg->getName();
+            EV << "FIFO/Regulator: Token not found, discarding the last message: " << msg->getName();
             cMessage *popped =  (cMessage *)buffer_message_array->pop();
             delete popped;
         }
     }
-
-    // If the FIFO queue is not empty, we pop the first element with queue->pop()
-    // and we send it out to the Regulator module
-
-
 }
 
+void FIFORegulator_file::finish()
+{
+    printf("\nFIFO/Regulator: Since start, there have been received a number of %d IP Packets in the FIFO/Regulator!\n\n", statistic_regulator_ip_counter);
+    printf("\nFIFO/Regulator: Since start, there have been received a number of %d Tokens in the FIFO/Regulator!\n\n", statistic_regulator_token_counter);
+}
 
 
 

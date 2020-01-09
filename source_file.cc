@@ -18,8 +18,10 @@ class Source_file : public cSimpleModule
   protected:
     virtual void initialize() override;
     virtual void handleMessage(cMessage *msg) override;
+    virtual void finish() override;
   private:
     cMessage *msg;
+    int statistic_source_ip_counter;
 };
 
 // The module class needs to be registered with OMNeT++
@@ -31,6 +33,8 @@ void Source_file::initialize()
     // create and send first message on gate "outSource"
 
     msg = new cMessage("IP Packet");
+    statistic_source_ip_counter = 1;
+
     send(msg, "outSource");
     EV << "Source: Generated first IP Packet!";
 }
@@ -40,6 +44,8 @@ void Source_file::handleMessage(cMessage *msg)
     // The handleMessage() method is called whenever a message arrives
     // at the module. Here, we have a message arriving from the Source_file.initialize() function
     // We send out the message to the FIFO Regulator module
+
+    statistic_source_ip_counter++;
 
     send(msg, "outSourceFifo");
     EV << "Source: Sending message from Source to FIFO";
@@ -51,6 +57,12 @@ void Source_file::handleMessage(cMessage *msg)
     send(msg, "outSource");
     EV << "Source: Generated a new IP Packet!";
 }
+
+void Source_file::finish()
+{
+    printf("\nSource: Since start, there have been created a number of %d IP Packets!\n\n", statistic_source_ip_counter);
+}
+
 
 
 

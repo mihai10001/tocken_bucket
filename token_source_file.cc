@@ -18,8 +18,10 @@ class Token_source_file : public cSimpleModule
   protected:
     virtual void initialize() override;
     virtual void handleMessage(cMessage *msg) override;
+    virtual void finish() override;
   private:
     cMessage *msg;
+    int statistic_source_token_counter;
 };
 
 // The module class needs to be registered with OMNeT++
@@ -31,6 +33,8 @@ void Token_source_file::initialize()
     // create and send first message on gate "outSource"
 
     msg = new cMessage("Token");
+    statistic_source_token_counter = 1;
+
     send(msg, "outSource");
     EV << "Source: Generated first Token!";
 }
@@ -41,6 +45,8 @@ void Token_source_file::handleMessage(cMessage *msg)
     // at the module. Here, we have a message arriving from the Token_source_file.initialize() function
     // We send out the message to the Token FIFO module
 
+    statistic_source_token_counter++;
+
     send(msg, "outSourceTokenFifo");
     EV << "Source: Sending message from Token Source to FIFO";
 
@@ -50,6 +56,11 @@ void Token_source_file::handleMessage(cMessage *msg)
     msg = new cMessage("Token");
     send(msg, "outSource");
     EV << "Token Source: Generated a new Token!";
+}
+
+void Token_source_file::finish()
+{
+    printf("\nToken Source: Since start, there have been created a number of %d Tokens!\n\n", statistic_source_token_counter);
 }
 
 
