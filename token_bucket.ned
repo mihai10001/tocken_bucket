@@ -17,21 +17,27 @@ simple Source_file
 {
     parameters:
         @display("i=block/source");
-        //volatile double generatorPeriod @unit(ms) = default(100ms);
     gates:
         input inSource;
         output outSource;
         output outSourceFifo;
 }
 
+simple Token_source_file
+{
+    parameters:
+        @display("i=block/source");
+    gates:
+        input inSource;
+        output outSource;
+        output outSourceTokenFifo;
+}
+
 simple Fifo_file
 {
     parameters:
         @display("i=block/queue;q=queue");
-        //@signal[qlen](type="long");
-        //@statistic[qlen](title="queue length"; record=vector,timeavg,max; interpolationmode=sample-hold);
     gates:
-        //input rxScheduling;
         input inFifo;
         output outFifo;
 }
@@ -40,11 +46,8 @@ simple Sink_file
 {
     parameters:
         @display("i=block/sink");
-        //int gateSize = default(100);
-        //@signal[lifetime](type="simtime_t");
-        //@statistic[lifetime](title="lifetime of arrived jobs"; unit=s; record=vector,mean,max; interpolationmode=none);
     gates:
-        input inSink; //[gateSize];
+        input inSink;
 }
 
 network TokenBucket

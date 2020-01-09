@@ -10,7 +10,7 @@
 using namespace omnetpp;
 
 /**
- * Derive the Source_file class from cSimpleModule.
+ * Derive the Sink_file class from cSimpleModule.
  */
 
 class Sink_file : public cSimpleModule
@@ -43,9 +43,8 @@ void Sink_file::handleMessage(cMessage *msg)
         sink_message_array[index] = *msg;
         index++;
         EV << "Sink: Received message from FIFO, adding to sink_array";
-    }
-    else {
-       EV << "Sink: Sink_array is full ! Discarding message: " << msg->getName();
+    } else {
+       EV << "Sink: Sink_array is full! Discarding message: " << msg->getName();
        delete msg;
     }
 }

@@ -10,7 +10,7 @@
 using namespace omnetpp;
 
 /**
- * Derive the Source_file class from cSimpleModule.
+ * Derive the Fifo_file class from cSimpleModule.
  */
 
 class Fifo_file : public cSimpleModule
@@ -43,18 +43,17 @@ void Fifo_file::handleMessage(cMessage *msg)
     if (buffer_message_array->getLength() < max_size) {
         buffer_message_array->insert(msg);
         EV << "FIFO: Received message from Source, adding to queue";
-    }
-    else {
-        EV << "FIFO: Queue is full ! Discarding message: " << msg->getName();
+    } else {
+        EV << "FIFO: Queue is full! Discarding message: " << msg->getName();
         delete msg;
     }
 
     // If the FIFO queue is not empty, we pop the first element with queue->pop()
-    // and we send it out to the Sink module
+    // and we send it out to the Regulator module
 
     if (!buffer_message_array->isEmpty()) {
         cMessage *popped =  (cMessage *)buffer_message_array->pop();
         send(popped, "outFifo");
-        EV << "FIFO: Sending message from FIFO to Sink";
+        EV << "FIFO: Sending message from FIFO to Regulator";
     }
 }

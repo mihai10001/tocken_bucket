@@ -32,14 +32,14 @@ void Source_file::initialize()
 
     msg = new cMessage("IP Packet");
     send(msg, "outSource");
-    EV << "Source: Generated first message!";
+    EV << "Source: Generated first IP Packet!";
 }
 
 void Source_file::handleMessage(cMessage *msg)
 {
     // The handleMessage() method is called whenever a message arrives
     // at the module. Here, we have a message arriving from the Source_file.initialize() function
-    // We send out the message to the FIFO module
+    // We send out the message to the FIFO Regulator module
 
     send(msg, "outSourceFifo");
     EV << "Source: Sending message from Source to FIFO";
@@ -49,7 +49,7 @@ void Source_file::handleMessage(cMessage *msg)
 
     msg = new cMessage("IP Packet");
     send(msg, "outSource");
-    EV << "Source: Generated a new message!";
+    EV << "Source: Generated a new IP Packet!";
 }
 
 
