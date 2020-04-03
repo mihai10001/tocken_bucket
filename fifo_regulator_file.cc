@@ -25,6 +25,12 @@ class FIFORegulator_file : public cSimpleModule
     cMessage *msg;
     int statistic_regulator_ip_counter;
     int statistic_regulator_token_counter;
+
+    int limit_LP;
+    int no_of_LP;
+    int no_of_HP;
+    char temp_flc_msg[20];
+    cMessage *flc_msg;
 };
 
 // The module class needs to be registered with OMNeT++
@@ -38,6 +44,10 @@ void FIFORegulator_file::initialize()
     max_size = 100;
     statistic_regulator_ip_counter = 0;
     statistic_regulator_token_counter = 0;
+
+    limit_LP = max_size / 2;
+    no_of_LP = 0;
+    no_of_HP = 0;
 }
 
 void FIFORegulator_file::handleMessage(cMessage *msg)
@@ -50,10 +60,25 @@ void FIFORegulator_file::handleMessage(cMessage *msg)
     // If there are tokens left, we send the message forward to the Sink module
     // If there are no tokens left, we discard the message
 
-    if (strcmp(msg->getName(), "IP Packet") == 0) {
+    // * UPDATE: Added FLC logic, 2 variables denoting the count of LOW and HIGH
+    // priority packages, and also another variable limit_LP, which denotes
+    // the limit of the LOW priority packets that can be in the queue at any time
+
+
+    if (strcmp(msg->getName(), "IP Packet LOW") == 0 ||
+        strcmp(msg->getName(), "IP Packet HIGH") == 0) {
         statistic_regulator_ip_counter++;
 
         if (buffer_message_array->getLength() < max_size) {
+            if (strcmp(msg->getName(), "IP Packet LOW") == 0)
+                no_of_LP++;
+            else if (strcmp(msg->getName(), "IP Packet HIGH") == 0)
+                no_of_HP++;
+
+            sprintf(temp_flc_msg, "%d-%d", no_of_LP, no_of_HP);
+            flc_msg = new cMessage(temp_flc_msg);
+            send(flc_msg, "outFifoRegFLC");
+
             buffer_message_array->insert(msg);
             EV << "FIFO/Regulator: Received message from Source, adding to queue";
         } else {

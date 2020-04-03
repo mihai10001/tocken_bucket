@@ -30,7 +30,9 @@ simple FIFORegulator_file
     gates:
         input inFifoRegPackets;
         input inFifoRegTokens;
+        input inFifoRegFLC;
         output outFifoReg;
+        output outFifoRegFLC;
 }
 
 simple Token_source_file
@@ -60,9 +62,18 @@ simple Sink_file
         input inSink;
 }
 
+simple FLC
+{
+    parameters:
+        @display("i=block/cogwheel");
+    gates:
+        input inFLC;
+        output outFLC;
+}
+
 network TokenBucket
 {
-    @display("bgb=887,457");
+    @display("bgb=1146.0487,664.90875");
     submodules:
         source: Source_file {
             @display("p=118,383;is=vl");
@@ -79,9 +90,12 @@ network TokenBucket
         sink: Sink_file {
             @display("is=vl;p=762,383");
         }
+        flc: FLC {
+            @display("is=vl;p=446.61374,541.28253");
+        }
     connections:
         // delay = the rate at which new IP Packets are created
-        source.outSource --> {  delay = 20ms; } --> source.inSource;
+        source.outSource --> {  delay = 50ms; } --> source.inSource;
         // delay = the rate at which new Tokens are created
         tokenSource.outSource --> {  delay = 100ms; } --> tokenSource.inSource;
 
@@ -93,4 +107,8 @@ network TokenBucket
 
         // delay = R-continually sustainable data rate ( without accounting Tokens to regulator delay )
         fifoReg.outFifoReg --> {  delay = 50ms; } --> sink.inSink;
+
+        // added FLC connections, the delay is not important
+        fifoReg.outFifoRegFLC --> {  delay = 20ms; } --> flc.inFLC;
+        flc.outFLC --> {  delay = 20ms; } --> fifoReg.inFifoRegFLC;
 }

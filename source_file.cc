@@ -20,7 +20,8 @@ class Source_file : public cSimpleModule
     virtual void handleMessage(cMessage *msg) override;
     virtual void finish() override;
   private:
-    cMessage *msg;
+    cMessage *msg_LP;
+    cMessage *msg_HP;
     int statistic_source_ip_counter;
 };
 
@@ -32,11 +33,13 @@ void Source_file::initialize()
     // Initialize is called at the beginning of the simulation.
     // create and send first message on gate "outSource"
 
-    msg = new cMessage("IP Packet");
-    statistic_source_ip_counter = 1;
+    msg_LP = new cMessage("IP Packet LOW");
+    msg_HP = new cMessage("IP Packet HIGH");
+    statistic_source_ip_counter = 2;
 
-    send(msg, "outSource");
-    EV << "Source: Generated first IP Packet!";
+    send(msg_LP, "outSource");
+    send(msg_HP, "outSource");
+    EV << "Source: Generated first two IP Packets!";
 }
 
 void Source_file::handleMessage(cMessage *msg)
@@ -53,9 +56,11 @@ void Source_file::handleMessage(cMessage *msg)
     // We generate a new message and we send in
     // the new message for the next Source_file.handleMessage() function
 
-    msg = new cMessage("IP Packet");
-    send(msg, "outSource");
-    EV << "Source: Generated a new IP Packet!";
+    msg_LP = new cMessage("IP Packet LOW");
+    msg_HP = new cMessage("IP Packet HIGH");
+    send(msg_LP, "outSource");
+    send(msg_HP, "outSource");
+    EV << "Source: Generated two new IP Packets!";
 }
 
 void Source_file::finish()
